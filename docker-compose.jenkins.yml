@@ -16,7 +16,7 @@ services:
       - /usr/bin/docker:/usr/bin/docker:ro
       - ~/.aws:/var/jenkins_home/.aws:ro
       - ~/.kube:/var/jenkins_home/.kube:ro
-      - ./iac:/var/jenkins_home/workspace/max-weather-iac:ro
+      - ./iac:/var/jenkins_home/workspace/max-weather-devops:ro
     environment:
       - JENKINS_OPTS=--httpPort=8080
       - JAVA_OPTS=-Xmx2048m -Xms1024m -Djenkins.install.runSetupWizard=false

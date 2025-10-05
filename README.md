@@ -5,7 +5,7 @@ A simplified weather API proxy/mock demonstrating AWS infrastructure capabilitie
 ## Project Structure
 
 ```
-max-weather-iac/
+max-weather-devops/
 ├── docker/                          # Application code
 │   ├── Dockerfile                   # Multi-stage Node.js build
 │   ├── app.js                       # Minimal Express proxy/mock

@@ -17,7 +17,7 @@ job('seed-jobs') {
         git {
             remote {
                 name('origin')
-                url('https://github.com/your-org/max-weather-iac.git')
+                url('https://github.com/PhamMinhHiepIT2/max-weather-devops.git')
                 credentials('github-token') // Use GitHub credentials
             }
             branch('main')

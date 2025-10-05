@@ -24,7 +24,7 @@ try {
         
         // Configure Git SCM
         def gitScm = new GitSCM(
-            [new UserRemoteConfig("https://github.com/your-org/max-weather-iac.git", "origin", "", "github-token")],
+            [new UserRemoteConfig("https://github.com/PhamMinhHiepIT2/max-weather-devops.git", "origin", "", "github-token")],
             [new BranchSpec("main")],
             false,
             null,
@@ -38,7 +38,7 @@ try {
         def buildStep = new Shell("""
 #!/bin/bash
 echo "Seed job executed - Pulling DSL scripts from Git repository"
-echo "Repository: https://github.com/your-org/max-weather-iac.git"
+echo "Repository: https://github.com/PhamMinhHiepIT2/max-weather-devops.git"
 echo "Branch: main"
 echo "DSL Scripts: jenkins/jobs/*.groovy"
 echo ""
