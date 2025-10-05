@@ -70,4 +70,4 @@ We can verify the running pods and their statuses using `kubectl get pods`.
 ## Network load balancer
 
 Internal network load balancer is created by Nginx ingress controller, and it is the endpoint which we used as an enddpoint in API Gateway.
-![nlb](./images/image.png)
+![nlb](./images/nlb.png)
