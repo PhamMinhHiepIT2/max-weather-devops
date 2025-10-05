@@ -13,6 +13,12 @@ variable "oidc_issuer_url" {
   type        = string
 }
 
+variable "manage_oidc_provider" {
+  description = "Whether this module should create the IAM OIDC provider (set false to use existing)"
+  type        = bool
+  default     = false
+}
+
 variable "permission_boundary_arn" {
   description = "Optional IAM permissions boundary to attach to roles"
   type        = string

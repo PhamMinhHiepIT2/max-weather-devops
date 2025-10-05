@@ -19,12 +19,20 @@ data "tls_certificate" "oidc" {
   url = var.oidc_issuer_url
 }
 
+resource "aws_iam_openid_connect_provider" "this" {
+  count = var.manage_oidc_provider ? 1 : 0
+  url             = var.oidc_issuer_url
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+}
+
 data "aws_iam_openid_connect_provider" "this" {
-  url = var.oidc_issuer_url
+  count = var.manage_oidc_provider ? 0 : 1
+  url   = var.oidc_issuer_url
 }
 
 locals {
-  oidc_provider_arn = data.aws_iam_openid_connect_provider.this.arn
+  oidc_provider_arn = coalesce(try(aws_iam_openid_connect_provider.this[0].arn, null), try(data.aws_iam_openid_connect_provider.this[0].arn, null))
   oidc_provider     = replace(var.oidc_issuer_url, "https://", "")
 }
 

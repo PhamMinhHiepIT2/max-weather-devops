@@ -1,7 +1,7 @@
 # EKS cluster and node role outputs are managed by the EKS module
 
 output "oidc_provider_arn" {
-  value       = data.aws_iam_openid_connect_provider.this.arn
+  value       = coalesce(try(aws_iam_openid_connect_provider.this[0].arn, null), try(data.aws_iam_openid_connect_provider.this[0].arn, null))
   description = "OIDC provider ARN"
 }
 
