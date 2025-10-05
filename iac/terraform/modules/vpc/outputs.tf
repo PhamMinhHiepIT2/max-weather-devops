@@ -15,7 +15,7 @@ output "private_subnet_ids" {
 
 output "private_route_table_ids" {
   description = "Route table IDs for private subnets"
-  value       = [for rt in aws_route_table.private : rt.id]
+  value       = [aws_route_table.private.id]
 }
 
 output "public_route_table_id" {
@@ -25,7 +25,7 @@ output "public_route_table_id" {
 
 output "nat_gateway_ids" {
   description = "NAT Gateway IDs by AZ index"
-  value       = { for k, v in aws_nat_gateway.this : k => v.id }
+  value       = [aws_nat_gateway.this.id]
 }
 
 output "vpc_endpoint_ids" {

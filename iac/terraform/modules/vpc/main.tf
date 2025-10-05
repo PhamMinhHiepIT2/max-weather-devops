@@ -36,16 +36,14 @@ resource "aws_internet_gateway" "this" {
 }
 
 resource "aws_eip" "nat" {
-  for_each = { for idx, az in local.azs : idx => az }
-  domain   = "vpc"
-  tags     = merge(local.tags, { "Name" = "${var.name}-eip-nat-${each.value}" })
+  domain = "vpc"
+  tags   = merge(local.tags, { "Name" = "${var.name}-eip-nat" })
 }
 
 resource "aws_nat_gateway" "this" {
-  for_each      = { for idx, az in local.azs : idx => az }
-  allocation_id = aws_eip.nat[each.key].id
-  subnet_id     = aws_subnet.public[each.key].id
-  tags          = merge(local.tags, { "Name" = "${var.name}-nat-${each.value}" })
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public["0"].id
+  tags          = merge(local.tags, { "Name" = "${var.name}-nat" })
   depends_on    = [aws_internet_gateway.this]
 }
 
@@ -67,23 +65,20 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
-  for_each = aws_nat_gateway.this
-  vpc_id   = aws_vpc.this.id
-  tags     = merge(local.tags, { "Name" = "${var.name}-rt-private-${each.key}" })
+  vpc_id = aws_vpc.this.id
+  tags   = merge(local.tags, { "Name" = "${var.name}-rt-private" })
 }
 
 resource "aws_route" "private_nat" {
-  for_each               = aws_route_table.private
-  route_table_id         = each.value.id
+  route_table_id         = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.this[each.key].id
+  nat_gateway_id         = aws_nat_gateway.this.id
 }
 
 resource "aws_route_table_association" "private" {
-  for_each  = aws_subnet.private
-  subnet_id = each.value.id
-  # Map subnet to RT in same AZ index
-  route_table_id = aws_route_table.private[each.key].id
+  for_each       = aws_subnet.private
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private.id
 }
 
 # VPC Endpoints
@@ -91,7 +86,7 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.this.id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = concat([aws_route_table.public.id], [for rt in aws_route_table.private : rt.id])
+  route_table_ids   = [aws_route_table.public.id, aws_route_table.private.id]
   tags              = merge(local.tags, { "Name" = "${var.name}-vpce-s3" })
 }
 
