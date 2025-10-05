@@ -66,7 +66,7 @@ max-weather-iac/
 - **Horizontal Pod Autoscaler (HPA)**: Scales pods based on CPU/memory usage
   - Min: 2 replicas, Max: 20 replicas
   - CPU target: 70%, Memory target: 80%
-- **EKS Node Group Auto-scaling**: Scales worker nodes based on pod scheduling needs
+- **EKS Node Group Auto-scaling**: Scales worker nodes based on pod scheduling needs using Karpenter
 - **API Gateway throttling**: Protects backend from traffic spikes
 
 ### 3. API Exposure
