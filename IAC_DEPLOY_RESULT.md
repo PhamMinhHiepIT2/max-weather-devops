@@ -153,3 +153,7 @@ module.root.module.vpc.aws_vpc_endpoint.s3
 
 **Cloudwatch:**
 ![CW](./docs/images/cloudwatch.png)
+
+
+**Destroy the infra after completed testing:**
+![iac-destroy](./docs/images/iac_destroy.png)
