@@ -7,8 +7,8 @@ def awsRegion = "ap-southeast-2"
 def codeFolder = "max-weather-devops"
 def ecrHost = "972709131469.dkr.ecr.ap-southeast-2.amazonaws.com"
 def ecrRepo = "max-weather-dev"
-def imageName = "972709131469.dkr.ecr.ap-southeast-2.amazonaws.com/max-weather-dev"
-def eksCluster = "max-weather-dev"
+def imageName = "972709131469.dkr.ecr.ap-southeast-2.amazonaws.com/max-weather-dev" //This is for testing purpose only, we should change it in real project
+def eksCluster = "max-weather-dev" //This is for testing purpose only, we should change it in real project
 def kustomizePath = "k8s/kustomize/overlays/weather-api/production"
 
 node('built-in') {
