@@ -52,7 +52,7 @@ max-weather-iac/
 ```
 
 ## Infrastructure Architecture
-![architecture](./diagrams/architecture.png)
+![architecture](./docs/diagrams/architecture.png)
 
 ## Key Features
 
