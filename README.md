@@ -182,15 +182,3 @@ The weather API is intentionally simplified to focus on infrastructure capabilit
 - **Ingress status**: `kubectl describe ingress weather-api`
 - **CloudWatch logs**: Check `/aws/eks/<cluster>/applications` log group
 
-## Assessment Compliance
-
-This implementation meets all assessment requirements:
-
-✅ **High Availability**: Multi-AZ, anti-affinity, 3+ replicas  
-✅ **Auto-scaling**: HPA + node group scaling  
-✅ **API Exposure**: Ingress + API Gateway  
-✅ **OAuth2**: Lambda authorizer with JWT validation  
-✅ **CI/CD**: Jenkins pipeline with staging/production  
-✅ **CloudWatch**: Logging and monitoring  
-✅ **Terraform**: Modular, parameterized infrastructure  
-✅ **Documentation**: Architecture diagrams and setup guides
