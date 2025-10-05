@@ -65,3 +65,9 @@ If the specified image tag **exists** in ECR, the pipeline proceeds successfully
 
 After the pipeline completes successfully, the new version of the service is deployed to the **Amazon EKS** cluster.  
 We can verify the running pods and their statuses using `kubectl get pods`.
+
+
+## Network load balancer
+
+Internal network load balancer is created by Nginx ingress controller, and it is the endpoint which we used as an enddpoint in API Gateway.
+![nlb](./images/image.png)
