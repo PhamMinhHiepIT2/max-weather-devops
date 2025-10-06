@@ -5,49 +5,63 @@ A simplified weather API proxy/mock demonstrating AWS infrastructure capabilitie
 ## Project Structure
 
 ```
-max-weather-devops/
-├── docker/                          # Application code
+max-weather-iac/
+├── app/                             # Application code
 │   ├── Dockerfile                   # Multi-stage Node.js build
 │   ├── app.js                       # Minimal Express proxy/mock
 │   └── package.json                 # Node.js dependencies
+├── iac/                             # Infrastructure as Code
+│   ├── terraform/                   # Terraform configurations
+│   │   ├── modules/                 # Reusable modules
+│   │   │   ├── vpc/                 # VPC, subnets, NAT, endpoints
+│   │   │   ├── eks/                 # EKS cluster + node groups
+│   │   │   ├── cloudwatch/          # Log groups + Fluent Bit
+│   │   │   ├── api-gateway/         # REST API + usage plans
+│   │   │   ├── lambda-authorizer/   # OAuth2/JWT authorizer
+│   │   │   ├── ecr/                 # ECR repository
+│   │   │   └── iam/                 # IAM roles + IRSA
+│   │   ├── environments/            # Environment-specific configs
+│   │   │   ├── dev/                 # Development environment
+│   │   │   ├── staging/             # Staging environment
+│   │   │   └── production/          # Production environment
+│   │   ├── main.tf                  # Root module configuration
+│   │   ├── variables.tf             # Input variables
+│   │   ├── outputs.tf               # Output values
+│   │   └── versions.tf              # Provider constraints
+│   └── lambda/                      # Lambda authorizer
+│       └── authorizer/              # OAuth2/JWT validation
+│           ├── index.js             # Authorizer logic
+│           └── package.json         # Dependencies
 ├── k8s/                             # Kubernetes manifests
-│   ├── weather-api/                 # Application resources
-│   │   ├── configmap.yaml           # App configuration
-│   │   ├── secret.yaml              # Sensitive data
-│   │   ├── serviceaccount.yaml      # IRSA service account
-│   │   ├── service.yaml             # ClusterIP service
-│   │   ├── deployment.yaml          # 3 replicas with anti-affinity
-│   │   ├── hpa.yaml                 # Horizontal Pod Autoscaler
-│   │   └── ingress.yaml             # NGINX ingress with CORS
-│   └── ingress-nginx/               # NGINX Ingress Controller
-│       └── values.yaml              # NLB + TLS configuration
-├── terraform/                       # Infrastructure as Code
-│   ├── modules/                     # Reusable modules
-│   │   ├── vpc/                     # VPC, subnets, NAT, endpoints
-│   │   ├── eks/                     # EKS cluster + node groups
-│   │   ├── cloudwatch/              # Log groups + Fluent Bit
-│   │   ├── api-gateway/             # REST API + usage plans
-│   │   ├── lambda-authorizer/       # OAuth2/JWT authorizer
-│   │   └── iam/                     # IAM roles + IRSA
-│   ├── environments/                # Environment-specific configs
-│   │   ├── staging/                 # Staging environment
-│   │   └── production/              # Production environment
-│   ├── main.tf                      # Root module configuration
-│   ├── variables.tf                 # Input variables
-│   ├── outputs.tf                   # Output values
-│   └── versions.tf                  # Provider constraints
-├── lambda/                          # Lambda authorizer
-│   └── authorizer/                  # OAuth2/JWT validation
-│       ├── index.js                 # Authorizer logic
-│       └── package.json             # Dependencies
-├── postman/                         # API testing
-│   ├── Max_Weather_API.postman_collection.json
-│   └── Max_Weather_API.postman_environment.json
+│   ├── charts/                      # Helm charts
+│   │   ├── ingress-nginx/           # NGINX Ingress Controller
+│   │   └── karpenter/               # Karpenter for node auto-scaling
+│   └── kustomize/                   # Kustomize configurations
+│       ├── base/                    # Base configurations
+│       │   ├── weather-api/         # Application resources
+│       │   └── fluentbit/           # Logging configuration
+│       ├── overlays/                # Environment overlays
+│       │   ├── weather-api/         # Environment-specific app configs
+│       │   └── fluentbit/           # Environment-specific logging
+│       └── deploy-*.sh              # Deployment scripts
+├── jenkins/                         # Jenkins CI/CD setup
+│   ├── init.groovy.d/               # Jenkins initialization scripts
+│   ├── jobs/                        # Jenkins job definitions
+│   ├── scripts/                     # Utility scripts
+│   ├── docker-compose.yml           # Jenkins container setup
+│   └── README.md                    # Jenkins documentation
 ├── docs/                            # Documentation
 │   ├── ARCHITECTURE.md              # System architecture
-│   └── architecture.drawio          # Visual diagram
+│   ├── CICD.md                      # CI/CD documentation
+│   ├── DEPLOYMENT.md                # Deployment guide
+│   ├── diagrams/                    # Architecture diagrams
+│   └── images/                      # Documentation images
+├── postman/                         # API testing
+│   └── Max_Weather_API.postman_collection.json
+├── docker-compose.jenkins.yml       # Jenkins Docker Compose
 ├── Jenkinsfile.staging              # CI/CD pipeline for staging
 ├── Jenkinsfile.production           # CI/CD pipeline for production
+├── IAC_DEPLOY_RESULT.md             # Infrastructure deployment results
 └── README.md                        # This file
 ```
 
@@ -82,9 +96,11 @@ max-weather-devops/
 - **IRSA (IAM Roles for Service Accounts)**: Secure AWS service access
 
 ### 5. CI/CD Pipeline
-- **Jenkins Pipeline**: Multi-stage deployment
+- **Jenkins Pipeline**: Multi-stage deployment with automated setup
   - Build & Test → Deploy to Staging → Manual Approval → Deploy to Production
-- **Rollout Deployment**: Zero-downtime deployments
+- **Jenkins Configuration as Code**: Automated Jenkins setup with plugins and credentials
+- **Multi-environment support**: Development, staging, and production pipelines
+- **Rollout Deployment**: Zero-downtime deployments using Kustomize
 - **Rollback capability**: Automatic rollback on deployment failures
 
 ### 6. CloudWatch Logging
@@ -112,22 +128,30 @@ The weather API is intentionally simplified to focus on infrastructure capabilit
 
 ### Deploy Infrastructure
 
-1. **Configure backend** (replace placeholders in `terraform/main.tf`):
+1. **Configure backend** (replace placeholders in `iac/terraform/main.tf`):
    ```bash
    # Update S3 bucket and DynamoDB table names
    ```
 
-2. **Deploy to staging**:
+2. **Deploy to development**:
    ```bash
-   cd terraform/environments/staging
+   cd iac/terraform/environments/dev
    terraform init
    terraform plan -var-file=terraform.tfvars
    terraform apply -var-file=terraform.tfvars
    ```
 
-3. **Deploy to production**:
+3. **Deploy to staging**:
    ```bash
-   cd terraform/environments/production
+   cd iac/terraform/environments/staging
+   terraform init
+   terraform plan -var-file=terraform.tfvars
+   terraform apply -var-file=terraform.tfvars
+   ```
+
+4. **Deploy to production**:
+   ```bash
+   cd iac/terraform/environments/production
    terraform init
    terraform plan -var-file=terraform.tfvars
    terraform apply -var-file=terraform.tfvars
@@ -140,11 +164,36 @@ The weather API is intentionally simplified to focus on infrastructure capabilit
    aws eks update-kubeconfig --region us-east-1 --name <cluster-name>
    ```
 
-2. **Apply Kubernetes manifests**:
+2. **Deploy using Kustomize**:
    ```bash
-   kubectl apply -f k8s/weather-api/
-   kubectl apply -f k8s/ingress-nginx/
+   # For development
+   ./k8s/kustomize/deploy-dev.sh
+   
+   # For staging
+   ./k8s/kustomize/deploy-staging.sh
+   
+   # For production
+   ./k8s/kustomize/deploy-production.sh
    ```
+
+3. **Deploy Fluent Bit for logging**:
+   ```bash
+   ./k8s/kustomize/deploy-fluentbit.sh
+   ```
+
+### Setup Jenkins CI/CD
+
+1. **Start Jenkins**:
+   ```bash
+   cd jenkins
+   docker-compose up -d
+   ```
+
+2. **Access Jenkins**: Navigate to `http://localhost:8080`
+
+3. **Configure credentials**: Jenkins will automatically configure AWS and Kubernetes credentials
+
+4. **Run seed job**: The initial seed job will create all pipeline jobs
 
 ### Test API
 
@@ -177,8 +226,19 @@ The weather API is intentionally simplified to focus on infrastructure capabilit
 
 ## Troubleshooting
 
+### Application Issues
 - **Pod issues**: `kubectl logs -f deploy/weather-api`
 - **HPA status**: `kubectl get hpa weather-api`
 - **Ingress status**: `kubectl describe ingress weather-api`
 - **CloudWatch logs**: Check `/aws/eks/<cluster>/applications` log group
+
+### Infrastructure Issues
+- **Terraform state**: Check `iac/terraform/environments/<env>/terraform.tfstate`
+- **EKS cluster**: `aws eks describe-cluster --name <cluster-name>`
+- **VPC connectivity**: Check security groups and NACLs
+
+### Jenkins Issues
+- **Jenkins logs**: `docker-compose logs jenkins`
+- **Pipeline failures**: Check Jenkins console output
+- **Credential issues**: Verify AWS and Kubernetes credentials in Jenkins
 
